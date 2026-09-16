@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BRIO — Le suivi nutritionnel qui tient dans une poche</title>
+<meta name="description" content="BRIO calcule tes calories et tes macros depuis ton profil, note tes repas en photo et suit ton poids. Gratuit, sans publicité, et ça marche hors connexion.">
+<meta name="theme-color" content="#E4CFF7">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- Aperçu quand le lien est partagé -->
+<meta property="og:title" content="BRIO — Le suivi nutritionnel qui tient dans une poche">
+<meta property="og:description" content="Tes calories et tes macros calculées depuis ton profil. Tes repas notés en photo. Gratuit et sans publicité.">
+<meta property="og:image" content="icons/icon-512.png">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&family=DynaPuff:wght@400;500;600&display=swap">
+
+<style>
+  /* Palette reprise de l'app, pour que la vitrine et BRIO soient
+     visiblement la même chose. Le thème clair est le principal, comme dans
+     l'app ; le sombre suit le réglage du système. */
+  :root{
+    --police:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --titre:'DynaPuff','DM Sans',system-ui,sans-serif;
+    --violet:#7B4FE0;
+    --violet-fonce:#5121D6;
+    --encre:#1C1730;
+    --doux:#6B6382;
+    --fond:#EDE1F5;
+    --fond-haut:#E4CFF7;
+    --verre:rgba(255,255,255,.45);
+    --verre-bord:rgba(255,255,255,.7);
+    --verre-fort:rgba(255,255,255,.62);
+    --teinte:rgba(123,79,224,.13);
+    --ombre:0 16px 36px -20px rgba(60,28,110,.5);
+    --point:rgba(91,58,168,.13);
+    --point-clair:rgba(91,58,168,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --violet:#A98DF0;
+      --encre:#EDECF4;
+      --doux:#AAA5B7;
+      --fond:#1D1226;
+      --fond-haut:#2A1B3D;
+      --verre:rgba(46,37,72,.595);
+      --verre-bord:rgba(255,255,255,.112);
+      --verre-fort:rgba(46,37,72,.75);
+      --teinte:rgba(169,141,240,.16);
+      --ombre:0 20px 44px -24px rgba(0,0,0,.85);
+      --point:rgba(255,255,255,.07);
+      --point-clair:rgba(255,255,255,.04);
+    }
+  }
+
+  *{box-sizing:border-box;letter-spacing:-.01em;}
+  html{scroll-behavior:smooth;}
+  /* Le fond porte trois couches : deux trames de points par-dessus le dégradé.
+     Une seule trame se lirait comme du papier millimétré ; deux, de pas 22 et
+     31 px, ne retombent jamais en phase, et l'œil n'y retrouve plus de grille.
+     Les bords des points sont adoucis (d'un rayon à l'autre il y a un demi-
+     pixel de dégradé), ce qui les fait lire comme du grain plutôt que comme
+     des ronds. Assez pâles pour ne pas se compter, assez présents pour que la
+     page ne soit pas une surface morte — et pour donner au verre des cartes
+     quelque chose à déformer, ce qu'un aplat ne fait pas. */
+  body{
+    margin:0;
+    font-family:var(--police);
+    color:var(--encre);
+    background-color:var(--fond);
+    background-image:
+      radial-gradient(circle at center, var(--point) .5px, transparent 1.3px),
+      radial-gradient(circle at center, var(--point-clair) .5px, transparent 1.3px),
+      linear-gradient(180deg,var(--fond-haut) 0%,var(--fond) 46%);
+    background-size:22px 22px, 31px 31px, 100% 760px;
+    background-position:0 0, 9px 14px, 0 0;
+    background-repeat:repeat, repeat, no-repeat;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} }
+
+  .page{max-width:940px;margin:0 auto;padding:0 20px;}
+
+  /* ---------- carte de verre, celle de l'app ---------- */
+  .verre{
+    background:var(--verre);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--verre-bord);
+    border-radius:22px;
+    box-shadow:var(--ombre);
+  }
+
+  /* ---------- en-tête ---------- */
+  .haut{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding-block:22px;
+  }
+  .marque{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;}
+  .marque img{width:40px;height:40px;border-radius:12px;display:block;}
+  .marque span{font-family:var(--titre);font-size:23px;line-height:1;color:var(--violet);}
+
+  /* ---------- boutons ---------- */
+  .bouton{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--police);font-weight:700;font-size:15px;
+    padding:13px 24px;border-radius:999px;text-decoration:none;
+    border:1px solid transparent;cursor:pointer;
+    transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .15s ease;
+  }
+  .bouton:active{transform:scale(.97);}
+  .bouton-plein{
+    background:#7B4FE0;color:#fff;
+    box-shadow:0 12px 28px -14px rgba(123,79,224,.95);
+  }
+  .bouton-plein:hover{box-shadow:0 16px 34px -14px rgba(123,79,224,1);}
+  .bouton-verre{
+    background:var(--verre);color:var(--violet);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    border-color:var(--verre-bord);
+  }
+  .bouton-petit{padding:10px 18px;font-size:14px;}
+  a:focus-visible,button:focus-visible{outline:3px solid rgba(123,79,224,.5);outline-offset:3px;}
+
+  /* ---------- ouverture ---------- */
+  .ouverture{text-align:center;padding-block:34px 56px;}
+  .mascotte{width:124px;height:124px;border-radius:32px;display:block;margin:0 auto 22px;
+    box-shadow:0 18px 40px -18px rgba(60,28,110,.55);}
+  .ouverture h1{
+    font-family:var(--titre);font-weight:400;
+    font-size:clamp(34px,7vw,54px);line-height:1.08;margin:0;
+    text-wrap:balance;
+  }
+  .accroche{
+    font-size:clamp(16px,2.4vw,19px);line-height:1.55;color:var(--doux);
+    max-width:35ch;margin:18px auto 0;text-wrap:balance;
+  }
+  .actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:30px;}
+  .mention{font-size:13.5px;color:var(--doux);margin-top:18px;}
+
+  /* ---------- ce que fait l'app ---------- */
+  section{padding-block:44px;}
+  .titre-section{
+    font-family:var(--titre);font-weight:400;
+    font-size:clamp(25px,4.4vw,34px);line-height:1.15;margin:0 0 10px;
+    text-align:center;text-wrap:balance;
+  }
+  .sous-section{
+    text-align:center;color:var(--doux);font-size:16px;line-height:1.55;
+    max-width:46ch;margin:0 auto 30px;text-wrap:balance;
+  }
+  .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;}
+  .carte{padding:24px 22px;}
+  .carte h3{
+    font-size:17px;font-weight:800;margin:14px 0 7px;line-height:1.25;
+  }
+  .carte p{font-size:14.5px;line-height:1.55;color:var(--doux);margin:0;}
+  .pastille{
+    width:44px;height:44px;border-radius:14px;display:flex;
+    align-items:center;justify-content:center;background:var(--teinte);color:var(--violet);
+  }
+  .pastille svg{width:23px;height:23px;}
+
+  /* ---------- comment ça marche ---------- */
+  .etapes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;counter-reset:etape;}
+  .etape{padding:24px 22px;}
+  .etape-num{
+    counter-increment:etape;
+    font-family:var(--titre);font-size:30px;line-height:1;color:var(--violet);
+  }
+  .etape-num::before{content:counter(etape);}
+  .etape h3{font-size:16.5px;font-weight:800;margin:12px 0 7px;}
+  .etape p{font-size:14.5px;line-height:1.55;color:var(--doux);margin:0;}
+
+  /* ---------- appel final ---------- */
+  .final{padding:40px 26px;text-align:center;margin-block:14px 48px;}
+  .final h2{
+    font-family:var(--titre);font-weight:400;
+    font-size:clamp(24px,4.4vw,32px);line-height:1.15;margin:0 0 12px;text-wrap:balance;
+  }
+  .final p{color:var(--doux);font-size:16px;line-height:1.55;margin:0 auto 26px;max-width:40ch;}
+
+  /* ---------- pied ---------- */
+  footer{
+    border-top:1px solid var(--verre-bord);
+    padding-block:26px 34px;
+    display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;justify-content:space-between;
+    font-size:13.5px;color:var(--doux);
+  }
+  footer a{color:var(--violet);text-decoration:none;font-weight:600;}
+  footer a:hover{text-decoration:underline;}
+  .liens-pied{display:flex;flex-wrap:wrap;gap:18px;}
+
+  @media (max-width:540px){
+    .haut .bouton{display:none;}
+    .ouverture{padding-block:18px 44px;}
+    .actions .bouton{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="haut">
+    <a class="marque" href="#">
+      <img src="icons/icon-192.png" alt="">
+      <span>BRIO</span>
+    </a>
+    <a class="bouton bouton-verre bouton-petit" href="https://brionutrition.github.io/BRIO/">Ouvrir l'app</a>
+  </header>
+
+  <main>
+    <div class="ouverture">
+      <img class="mascotte" src="icons/icon-512.png" alt="Brioche, la mascotte de BRIO" width="124" height="124">
+      <h1>Manger mieux, sans y passer ses journées</h1>
+      <p class="accroche">
+        BRIO calcule tes calories et tes macros depuis ton profil, puis te laisse
+        noter tes repas en quelques secondes. Brioche s'occupe du reste.
+      </p>
+      <div class="actions">
+        <a class="bouton bouton-plein" href="https://brionutrition.github.io/BRIO/">Commencer, c'est gratuit</a>
+        <a class="bouton bouton-verre" href="#fonctions">Voir ce que ça fait</a>
+      </div>
+      <p class="mention">Sans publicité · Sans abonnement · Fonctionne hors connexion</p>
+    </div>
+
+    <section id="fonctions">
+      <h2 class="titre-section">Tout ce qu'il faut, rien de plus</h2>
+      <p class="sous-section">
+        Un objectif calculé pour toi, des repas notés sans effort, et tes progrès
+        qui se voient.
+      </p>
+
+      <div class="grille">
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c3.4 4.2 5.8 7 5.8 10.2a5.8 5.8 0 0 1-11.6 0c0-1.6.6-3 1.7-4.4.3 1.4 1 2.4 2 2.9-.5-3.3.2-6 2.1-8.7z"/></svg>
+          </div>
+          <h3>Ton objectif, calculé</h3>
+          <p>
+            Ton poids, ta taille, ton activité et tes entraînements donnent tes
+            calories et tes macros du jour. Pas un chiffre au hasard.
+          </p>
+        </article>
+
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9Z"/><circle cx="12" cy="12.8" r="3.4"/></svg>
+          </div>
+          <h3>Une photo suffit</h3>
+          <p>
+            Prends ton assiette en photo : Brioche reconnaît les aliments, estime
+            les portions et remplit le journal à ta place.
+          </p>
+        </article>
+
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M16.5 8v8"/></svg>
+          </div>
+          <h3>Le code-barres aussi</h3>
+          <p>
+            Scanne un produit et ses valeurs arrivent seules. Tes aliments
+            habituels restent à portée dans tes favoris.
+          </p>
+        </article>
+
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.6 3.5h12.8l-1.5 16.1a2.2 2.2 0 0 1-2.2 2h-5.4a2.2 2.2 0 0 1-2.2-2z"/></svg>
+          </div>
+          <h3>L'hydratation comptée</h3>
+          <p>
+            Un objectif d'eau adapté à ton poids, et des raccourcis pour ajouter
+            un verre sans réfléchir.
+          </p>
+        </article>
+
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+          </div>
+          <h3>Tes progrès, en clair</h3>
+          <p>
+            Ton poids, ton IMC et ta courbe semaine après semaine. Plus une série
+            de jours qui donne envie de continuer.
+          </p>
+        </article>
+
+        <article class="verre carte">
+          <div class="pastille" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v18H6.5A2.5 2.5 0 0 1 4 18.5v-13Z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H12v18h5.5a2.5 2.5 0 0 0 2.5-2.5v-13Z"/></svg>
+          </div>
+          <h3>Des idées de repas</h3>
+          <p>
+            Des menus qui tiennent dans tes objectifs et qui tiennent compte de
+            ce que tu aimes — et de ce que tu ne manges pas.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titre-section">Trois minutes pour démarrer</h2>
+      <p class="sous-section">Pas d'installation, pas de carte bancaire.</p>
+
+      <div class="etapes">
+        <article class="verre etape">
+          <div class="etape-num" aria-hidden="true"></div>
+          <h3>Réponds au questionnaire</h3>
+          <p>
+            Quelques questions sur toi et ton objectif. BRIO en tire tes calories
+            et tes macros du jour.
+          </p>
+        </article>
+        <article class="verre etape">
+          <div class="etape-num" aria-hidden="true"></div>
+          <h3>Note tes repas</h3>
+          <p>
+            À la main, au code-barres ou en photo. Les anneaux se remplissent au
+            fil de la journée.
+          </p>
+        </article>
+        <article class="verre etape">
+          <div class="etape-num" aria-hidden="true"></div>
+          <h3>Ajoute-la à ton écran</h3>
+          <p>
+            Depuis ton navigateur, « Ajouter à l'écran d'accueil ». BRIO s'ouvre
+            ensuite comme n'importe quelle app.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titre-section">Tes données restent les tiennes</h2>
+      <p class="sous-section">
+        Ton compte te suit d'un appareil à l'autre, et personne d'autre que toi
+        ne peut lire ton suivi — c'est le serveur qui le garantit, pas une
+        promesse. L'app s'ouvre et répond même sans réseau : ce que tu notes hors
+        connexion repart tout seul au retour du signal.
+      </p>
+    </section>
+
+    <div class="verre final">
+      <h2>On y arrivera avec brio</h2>
+      <p>
+        Gratuit, sans publicité, et sans rien à installer. Il suffit d'ouvrir
+        la page.
+      </p>
+      <a class="bouton bouton-plein" href="https://brionutrition.github.io/BRIO/">Ouvrir BRIO</a>
+    </div>
+  </main>
+
+  <footer>
+    <div>© <span id="annee">2026</span> BRIO</div>
+    <nav class="liens-pied">
+      <a href="https://brionutrition.github.io/BRIO/">L'application</a>
+      <a href="https://github.com/BrioNutrition/BRIO">Code source</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+  document.getElementById('annee').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
