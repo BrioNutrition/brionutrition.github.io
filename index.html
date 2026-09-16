@@ -130,12 +130,9 @@
   a:focus-visible,button:focus-visible{outline:3px solid rgba(123,79,224,.5);outline-offset:3px;}
 
   /* ---------- ouverture ---------- */
-  .ouverture{text-align:center;padding-block:34px 56px;}
-  .mascotte{width:124px;height:124px;border-radius:32px;display:block;margin:0 auto 22px;
-    box-shadow:0 18px 40px -18px rgba(60,28,110,.55);}
-  .ouverture h1{
+  .ouverture-texte h1{
     font-family:var(--titre);font-weight:700;
-    font-size:clamp(34px,7vw,54px);line-height:1.08;margin:0;
+    font-size:clamp(32px,5.6vw,50px);line-height:1.1;margin:0;
     text-wrap:balance;
   }
   .accroche{
@@ -162,19 +159,40 @@
     .ouverture-texte .mascotte{margin-inline:0;}
   }
 
+  /* Cadre d'iPhone 15 : 393 x 852 points, soit le ratio 2.168 des captures.
+     L'écran impose ce ratio et recadre au besoin (object-fit), donc l'image ne
+     peut plus être étirée — ce qu'elle était, faute d'un height:auto. */
   .telephone{
-    position:relative;width:min(300px,84vw);margin:0 auto;
-    border-radius:44px;padding:11px;
-    background:linear-gradient(160deg,#2A1B3D,#160D24);
-    box-shadow:0 34px 70px -28px rgba(40,16,90,.72), 0 0 0 1px rgba(255,255,255,.08) inset;
+    position:relative;width:min(300px,82vw);margin:0 auto;
+    aspect-ratio:393 / 852;
+    border-radius:54px;padding:10px;
+    background:linear-gradient(155deg,#3A3247,#15111C 42%,#2C2536);
+    box-shadow:
+      0 0 0 1.5px rgba(255,255,255,.14) inset,
+      0 34px 70px -28px rgba(40,16,90,.7);
   }
-  .telephone::after{
-    /* l'encoche : ce détail suffit à faire lire l'image comme un téléphone */
-    content:'';position:absolute;top:19px;left:50%;transform:translateX(-50%);
-    width:86px;height:7px;border-radius:99px;background:rgba(255,255,255,.22);
+  .telephone-ecran{
+    position:relative;width:100%;height:100%;
+    border-radius:45px;overflow:hidden;
+    /* la teinte du haut de l'app : c'est elle qui remplit la bande d'état */
+    background:#E4CFF7;
   }
-  .telephone img{
-    display:block;width:100%;border-radius:34px;
+  /* la capture commence sous l'îlot, comme l'app sous la barre d'état d'un
+     vrai téléphone — sinon l'îlot mange le « Bonjour » */
+  .telephone-ecran img{
+    display:block;width:100%;height:calc(100% - 30px);margin-top:30px;
+    object-fit:cover;object-position:top center;
+  }
+  /* l'îlot dynamique : c'est ce détail qui fait lire un iPhone plutôt qu'un
+     rectangle noir */
+  .telephone-ilot{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:31%;height:26px;border-radius:99px;background:#0B0810;z-index:2;
+  }
+  .telephone-ilot::after{
+    content:'';position:absolute;right:16%;top:50%;transform:translateY(-50%);
+    width:8px;height:8px;border-radius:50%;
+    background:radial-gradient(circle at 34% 34%, #3A4A6B, #0E1320 70%);
   }
   .duo-ecrans{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
@@ -261,7 +279,6 @@
   <main>
     <div class="ouverture-duo">
       <div class="ouverture-texte">
-        <img class="mascotte" src="icons/icon-512.png" alt="Brioche, la mascotte de BRIO" width="124" height="124">
         <h1>Manger mieux, sans y passer ses journées</h1>
         <p class="accroche">
           BRIO calcule tes calories et tes macros depuis ton profil, puis te laisse
@@ -275,10 +292,11 @@
       </div>
 
       <div class="telephone">
-        <img src="img/app-accueil.jpg"
-             alt="L'accueil de BRIO : 1334 calories restantes, les anneaux de protéines, glucides et lipides, et les repas de la journée."
-             width="400" height="850" loading="eager">
-      </div>
+          <div class="telephone-ilot" aria-hidden="true"></div>
+          <div class="telephone-ecran">
+            <img src="img/app-accueil.jpg" alt="L'accueil de BRIO : 1334 calories restantes, les anneaux de protéines, glucides et lipides, et les repas de la journée." width="786" height="1704" loading="eager">
+          </div>
+        </div>
     </div>
 
     <section id="fonctions">
@@ -366,13 +384,19 @@
       <div class="duo-ecrans">
         <div>
           <div class="telephone">
-            <img src="img/app-saisie.jpg" alt="La saisie d'un repas dans BRIO : la recherche d'aliments, avec des suggestions et les champs de quantité et de macros." width="400" height="850" loading="lazy">
+            <div class="telephone-ilot" aria-hidden="true"></div>
+            <div class="telephone-ecran">
+              <img src="img/app-saisie.jpg" alt="La saisie d'un repas dans BRIO : la recherche d'aliments, avec des suggestions et les champs de quantité et de macros." width="786" height="1704" loading="lazy">
+            </div>
           </div>
           <p class="legende">Cherche un aliment, ou scanne son code-barres.</p>
         </div>
         <div>
           <div class="telephone">
-            <img src="img/app-repas.jpg" alt="Le journal de BRIO : petit-déjeuner, déjeuner et snack détaillés avec leurs calories et macros, et le suivi de l'hydratation." width="400" height="850" loading="lazy">
+            <div class="telephone-ilot" aria-hidden="true"></div>
+            <div class="telephone-ecran">
+              <img src="img/app-repas.jpg" alt="Le journal de BRIO : petit-déjeuner, déjeuner et snack détaillés avec leurs calories et macros, et le suivi de l'hydratation." width="786" height="1704" loading="lazy">
+            </div>
           </div>
           <p class="legende">Chaque aliment avec ses macros, et l'eau du jour.</p>
         </div>
