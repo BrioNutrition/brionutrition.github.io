@@ -215,7 +215,12 @@
     text-align:center;color:var(--doux);font-size:16px;line-height:1.55;
     max-width:46ch;margin:0 auto 30px;text-wrap:balance;
   }
-  .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;}
+  /* Quatre cartes : deux rangées de deux. En colonnes automatiques, la
+     quatrième se retrouvait seule sur une deuxième ligne. */
+  .grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+  @media (max-width:560px){
+    .grille{grid-template-columns:1fr;}
+  }
   .carte{padding:24px 22px;}
   .carte h3{
     font-size:17px;font-weight:800;margin:14px 0 7px;line-height:1.25;
@@ -283,19 +288,26 @@
     .carte{transition:none;}
   }
 
-  /* ---------- les deux menus expliqués en dessin ---------- */
-  .duo-menus{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;
-    margin-top:14px;perspective:1100px;
+  /* ---------- Progrès et Recettes, expliqués en dessin ---------- */
+  /* Deux fonctions différentes : chacune a sa section et son titre, et le
+     dessin change de côté de l'une à l'autre pour qu'on ne relise pas deux
+     fois la même carte. */
+  .fonction-scene{perspective:1100px;}
+  .fonction{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:clamp(20px,3.4vw,38px);align-items:center;padding:26px;
   }
-  .carte-menu{padding:22px 22px 26px;}
   .dessin{
-    display:block;width:100%;height:auto;margin-bottom:18px;
+    display:block;width:100%;height:auto;
     border-radius:16px;background:var(--teinte);padding:10px 8px;
   }
-  .carte-menu h3{font-size:18px;font-weight:800;margin:0 0 8px;line-height:1.25;}
-  .carte-menu p{font-size:14.5px;line-height:1.6;color:var(--doux);margin:0;}
-  .carte-menu p + p{margin-top:10px;}
+  .fonction-inverse .dessin{order:2;}
+  .fonction-texte p{font-size:15.5px;line-height:1.65;color:var(--doux);margin:0;}
+  .fonction-texte p + p{margin-top:12px;}
+  @media (max-width:640px){
+    .fonction{grid-template-columns:1fr;padding:22px;}
+    .fonction-inverse .dessin{order:0;}
+  }
 
   /* traits et aplats des dessins */
   .d-grille line{stroke:var(--violet);stroke-opacity:.18;stroke-width:1;stroke-dasharray:3 5;}
@@ -446,78 +458,95 @@
       </div>
     </section>
 
-      <div class="duo-menus">
-        <article class="verre carte carte-menu">
-          <svg class="dessin" viewBox="0 0 320 152" role="img" aria-label="Une courbe de poids qui descend, de 80,6 à 78,4 kilos, et une jauge d'IMC.">
-            <!-- lignes de repère -->
-            <g class="d-grille">
-              <line x1="18" y1="34" x2="302" y2="34"/>
-              <line x1="18" y1="62" x2="302" y2="62"/>
-              <line x1="18" y1="90" x2="302" y2="90"/>
-            </g>
-            <!-- l'aire sous la courbe -->
-            <path class="d-aire" d="M22 44 C 62 48, 84 56, 118 62 S 186 76, 222 80 S 278 86, 298 88 L298 104 L22 104 Z"/>
-            <!-- la courbe -->
-            <path class="d-courbe" d="M22 44 C 62 48, 84 56, 118 62 S 186 76, 222 80 S 278 86, 298 88"/>
-            <!-- les pesées -->
-            <g class="d-point">
-              <circle cx="22" cy="44" r="3"/>
-              <circle cx="90" cy="57" r="3"/>
-              <circle cx="160" cy="68" r="3"/>
-              <circle cx="228" cy="81" r="3"/>
-            </g>
-            <!-- la dernière pesée, mise en avant -->
-            <circle class="d-halo" cx="298" cy="88" r="9"/>
-            <circle class="d-dernier" cx="298" cy="88" r="4.6"/>
-            <!-- la jauge d'IMC -->
-            <rect class="d-jauge" x="22" y="124" width="276" height="9" rx="4.5"/>
-            <rect class="d-jauge-plein" x="22" y="124" width="126" height="9" rx="4.5"/>
-            <circle class="d-curseur" cx="148" cy="128.5" r="8"/>
-          </svg>
-          <h3>Progrès — ce que ça donne au fil des semaines</h3>
-          <p>
-            Chaque pesée se pose sur une courbe. Tu vois la tendance plutôt que
-            le chiffre du jour, qui monte et descend pour dix raisons sans
-            rapport avec ce que tu manges.
-          </p>
-          <p>
-            À côté, ton IMC et l'écart qui te sépare encore de ton objectif.
-          </p>
-        </article>
+    <section id="progres">
+      <h2 class="titre-section">Progrès</h2>
+      <p class="sous-section">
+        Ce que ça donne au fil des semaines, pas au jour le jour.
+      </p>
 
-        <article class="verre carte carte-menu">
-          <svg class="dessin" viewBox="0 0 320 152" role="img" aria-label="Une assiette partagée en trois parts — protéines, féculents et légumes — avec une toque et des couverts.">
-            <!-- la toque -->
-            <g class="d-toque">
-              <!-- trois lobes et un bandeau : c'est ce qui fait lire une toque -->
-              <circle cx="244" cy="32" r="13"/>
-              <circle cx="264" cy="25" r="16"/>
-              <circle cx="284" cy="32" r="13"/>
-              <rect x="245" y="30" width="38" height="20" rx="5"/>
-              <rect class="d-toque-bande" x="243" y="49" width="42" height="11" rx="4"/>
-            </g>
-            <!-- l'assiette -->
-            <circle class="d-assiette" cx="118" cy="80" r="52"/>
-            <circle class="d-assiette-creux" cx="118" cy="80" r="42"/>
-            <!-- les trois parts -->
-            <path class="d-part-prot" d="M118 80 L118 40 A40 40 0 0 1 152 99 Z"/>
-            <path class="d-part-glu"  d="M118 80 L152 99 A40 40 0 0 1 84 99 Z"/>
-            <path class="d-part-leg"  d="M118 80 L84 99 A40 40 0 0 1 118 40 Z"/>
-            <!-- les couverts -->
-            <g class="d-couvert">
-              <path d="M196 52v22c0 4 2 6 5 7v41M196 52v14M203 52v14"/>
-              <path d="M222 52c-5 0-8 6-8 13s3 12 8 12v45"/>
-            </g>
-          </svg>
-          <h3>Recettes — quoi manger, concrètement</h3>
-          <p>
-            Des menus construits pour tomber dans tes calories et tes macros du
-            jour, et une journée type si tu ne veux rien décider.
-          </p>
-          <p>
-            Un questionnaire sur tes goûts affine les propositions : ce que tu
-            aimes revient, ce que tu ne manges pas disparaît.
-          </p>
+      <div class="fonction-scene">
+        <article class="verre carte fonction">
+            <svg class="dessin" viewBox="0 0 320 152" role="img" aria-label="Une courbe de poids qui descend, de 80,6 à 78,4 kilos, et une jauge d'IMC.">
+              <!-- lignes de repère -->
+              <g class="d-grille">
+                <line x1="18" y1="34" x2="302" y2="34"/>
+                <line x1="18" y1="62" x2="302" y2="62"/>
+                <line x1="18" y1="90" x2="302" y2="90"/>
+              </g>
+              <!-- l'aire sous la courbe -->
+              <path class="d-aire" d="M22 44 C 62 48, 84 56, 118 62 S 186 76, 222 80 S 278 86, 298 88 L298 104 L22 104 Z"/>
+              <!-- la courbe -->
+              <path class="d-courbe" d="M22 44 C 62 48, 84 56, 118 62 S 186 76, 222 80 S 278 86, 298 88"/>
+              <!-- les pesées -->
+              <g class="d-point">
+                <circle cx="22" cy="44" r="3"/>
+                <circle cx="90" cy="57" r="3"/>
+                <circle cx="160" cy="68" r="3"/>
+                <circle cx="228" cy="81" r="3"/>
+              </g>
+              <!-- la dernière pesée, mise en avant -->
+              <circle class="d-halo" cx="298" cy="88" r="9"/>
+              <circle class="d-dernier" cx="298" cy="88" r="4.6"/>
+              <!-- la jauge d'IMC -->
+              <rect class="d-jauge" x="22" y="124" width="276" height="9" rx="4.5"/>
+              <rect class="d-jauge-plein" x="22" y="124" width="126" height="9" rx="4.5"/>
+              <circle class="d-curseur" cx="148" cy="128.5" r="8"/>
+            </svg>
+          <div class="fonction-texte">
+            <p>
+              Chaque pesée se pose sur une courbe. Tu vois la tendance plutôt que
+              le chiffre du jour, qui monte et descend pour dix raisons sans
+              rapport avec ce que tu manges.
+            </p>
+            <p>
+              À côté, ton IMC et l'écart qui te sépare encore de ton objectif.
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="recettes">
+      <h2 class="titre-section">Recettes</h2>
+      <p class="sous-section">
+        Quoi manger, concrètement, sans y passer la soirée.
+      </p>
+
+      <div class="fonction-scene">
+        <article class="verre carte fonction fonction-inverse">
+            <svg class="dessin" viewBox="0 0 320 152" role="img" aria-label="Une assiette partagée en trois parts — protéines, féculents et légumes — avec une toque et des couverts.">
+              <!-- la toque -->
+              <g class="d-toque">
+                <!-- trois lobes et un bandeau : c'est ce qui fait lire une toque -->
+                <circle cx="244" cy="32" r="13"/>
+                <circle cx="264" cy="25" r="16"/>
+                <circle cx="284" cy="32" r="13"/>
+                <rect x="245" y="30" width="38" height="20" rx="5"/>
+                <rect class="d-toque-bande" x="243" y="49" width="42" height="11" rx="4"/>
+              </g>
+              <!-- l'assiette -->
+              <circle class="d-assiette" cx="118" cy="80" r="52"/>
+              <circle class="d-assiette-creux" cx="118" cy="80" r="42"/>
+              <!-- les trois parts -->
+              <path class="d-part-prot" d="M118 80 L118 40 A40 40 0 0 1 152 99 Z"/>
+              <path class="d-part-glu"  d="M118 80 L152 99 A40 40 0 0 1 84 99 Z"/>
+              <path class="d-part-leg"  d="M118 80 L84 99 A40 40 0 0 1 118 40 Z"/>
+              <!-- les couverts -->
+              <g class="d-couvert">
+                <path d="M196 52v22c0 4 2 6 5 7v41M196 52v14M203 52v14"/>
+                <path d="M222 52c-5 0-8 6-8 13s3 12 8 12v45"/>
+              </g>
+            </svg>
+          <div class="fonction-texte">
+            <p>
+              Des menus construits pour tomber dans tes calories et tes macros du
+              jour, et une journée type si tu ne veux rien décider.
+            </p>
+            <p>
+              Un questionnaire sur tes goûts affine les propositions : ce que tu
+              aimes revient, ce que tu ne manges pas disparaît.
+            </p>
+          </div>
         </article>
       </div>
     </section>
